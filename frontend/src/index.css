@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0a0f1e;
+  --bg-gradient: linear-gradient(135deg, #0a0f1e 0%, #0f172a 50%, #0a0f1e 100%);
+  --card-bg: #0f172a;
+  --bg-secondary: #0f172a;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(51, 65, 85, 0.5);
+  --input-bg: #1e293b;
+  --scroll-track: #0f172a;
+  --scroll-thumb: #334155;
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  
+  /* Admin & General Semantic Colors */
+  --surface-accent: rgba(51, 65, 85, 0.3);
+  --border-muted: rgba(51, 65, 85, 0.5);
+  
+  /* Visualizer Semantic Colors */
+  --viz-bg-inactive: rgba(31, 41, 55, 0.5);
+  --viz-bg-hover: #334155;
+  --viz-border-inactive: rgba(255, 255, 255, 0.1);
+  --viz-highlight-active: #0ea5e9;
+  --viz-highlight-compare: #ef4444;
+  --viz-highlight-success: #10b981;
+  --viz-highlight-active-bg: rgba(14, 165, 233, 0.2);
+  --viz-highlight-compare-bg: rgba(239, 68, 68, 0.2);
+  --viz-highlight-success-bg: rgba(16, 185, 129, 0.2);
+  --viz-highlight-warning: #eab308;
+  --viz-highlight-warning-bg: rgba(234, 179, 8, 0.2);
+  --viz-highlight-error: #ef4444;
+  --viz-highlight-error-bg: rgba(239, 68, 68, 0.2);
+  --viz-text-on-highlight: #ffffff;
+}
+
+[data-theme='light'] {
+  --bg-primary: #f8fafc;
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+  --card-bg: #ffffff;
+  --bg-secondary: #ffffff;
+  --text-primary: #020617;
+  --text-secondary: #334155;
+  --border-color: rgba(226, 232, 240, 0.8);
+  --input-bg: #ffffff;
+  --scroll-track: #f1f5f9;
+  --scroll-thumb: #cbd5e1;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+
+  /* Admin & General Semantic Colors (Light Mode) */
+  --surface-accent: #e2e8f0;
+  --border-muted: #cbd5e1;
+
+  /* Visualizer Semantic Colors (Light Mode) */
+  --viz-bg-inactive: #f1f5f9;
+  --viz-bg-hover: #e2e8f0;
+  --viz-border-inactive: #e2e8f0;
+  --viz-highlight-active: #2563eb;
+  --viz-highlight-compare: #dc2626;
+  --viz-highlight-success: #16a34a;
+  --viz-highlight-active-bg: rgba(37, 99, 235, 0.1);
+  --viz-highlight-compare-bg: rgba(220, 38, 38, 0.1);
+  --viz-highlight-success-bg: rgba(22, 163, 74, 0.1);
+  --viz-highlight-warning: #d97706;
+  --viz-highlight-warning-bg: rgba(217, 119, 6, 0.1);
+  --viz-highlight-error: #dc2626;
+  --viz-highlight-error-bg: rgba(220, 38, 38, 0.1);
+  --viz-text-on-highlight: #ffffff;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    @apply font-sans antialiased;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scroll-track);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    @apply rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand-600;
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    @apply rounded-2xl p-6 shadow-xl transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-500 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-brand-600/30 active:scale-95;
+  }
+
+  .btn-secondary {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    @apply font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 active:scale-95 hover:brightness-110;
+  }
+
+  .btn-danger {
+    @apply bg-red-600/20 hover:bg-red-600/30 text-red-500 hover:text-red-400 font-semibold px-4 py-2 rounded-xl border border-red-500/30 transition-all duration-200;
+  }
+
+  .input {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    @apply w-full placeholder-slate-600 rounded-xl px-4 py-3 outline-none transition-all duration-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500;
+  }
+
+  .badge-easy {
+    @apply bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  .badge-medium {
+    @apply bg-yellow-500/20 text-yellow-600 border border-yellow-500/30 text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  .badge-hard {
+    @apply bg-red-500/20 text-red-600 border border-red-500/30 text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  .topic-tag {
+    @apply bg-brand-500/10 text-brand-600 border border-brand-500/20 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+  }
+
+  .text-slate-100 { color: var(--text-primary) !important; }
+  .text-slate-200 { color: var(--text-primary) !important; opacity: 0.9; }
+  .text-slate-300 { color: var(--text-primary) !important; opacity: 0.8; }
+  .text-slate-400 { color: var(--text-secondary) !important; }
+  .text-slate-500 { color: var(--text-secondary) !important; opacity: 0.8; }
+}

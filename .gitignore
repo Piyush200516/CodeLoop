@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+dist/
+build/
+.env
+
+# Tooling
+.DS_Store
+*.log
+startup_err.txt
+
+# Local IDE folders
+.vscode/
+.idea/
+
+# Backend specific
+backend/node_modules/
+backend/.env
+
+# Frontend specific
+frontend/node_modules/
+frontend/dist/
+frontend/.env

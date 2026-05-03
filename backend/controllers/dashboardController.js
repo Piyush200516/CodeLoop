@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
 
 // @desc Get dashboard stats
 // @route GET /api/dashboard

@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
 
 // SM-2 Algorithm
 const calculateSM2 = (ease_factor, interval_days, repetition, rating) => {

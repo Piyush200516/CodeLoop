@@ -39,13 +39,13 @@ export default function DemoPage() {
                 {/* Header */}
                 <div className="text-center space-y-3">
                     <span className="text-xs font-black uppercase tracking-[0.25em] text-brand-500 opacity-70">
-                        Welcome to CodeRecall
+        Welcome to CodeLoop
                     </span>
                     <h1 className="text-4xl sm:text-5xl font-black text-slate-100 tracking-tight">
                         Watch How This <span className="text-brand-500">App Works</span>
                     </h1>
                     <p className="text-slate-400 text-lg max-w-xl mx-auto">
-                        See how CodeRecall helps you master LeetCode with spaced repetition, recall mode, and interactive visualizers.
+                        See how CodeLoop helps you master LeetCode with spaced repetition, recall mode, and interactive visualizers.
                     </p>
                 </div>
 
@@ -56,7 +56,7 @@ export default function DemoPage() {
                             <iframe
                                 className="absolute inset-0 w-full h-full"
                                 src={`https://www.youtube.com/embed/${YOUTUBE_ID}?rel=0&modestbranding=1&autoplay=1`}
-                                title="CodeRecall Demo"
+                                title="CodeLoop Demo"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
                             />

@@ -28,7 +28,7 @@ export default function Pricing() {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_SX2d403j71KuAK',
                 amount: order.amount,
                 currency: order.currency,
-                name: 'CodeRecall Premium',
+                name: 'CodeLoop Premium',
                 description: 'Unlock all visualization and recall features',
                 order_id: order.id,
                 handler: async function (response) {

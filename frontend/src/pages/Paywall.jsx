@@ -25,7 +25,7 @@ export default function Paywall() {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_SX2d403j71KuAK',
                 amount: order.amount,
                 currency: order.currency,
-                name: 'CodeRecall Full Access',
+                name: 'CodeLoop Full Access',
                 description: 'Unlock lifetime access to all features',
                 order_id: order.id,
                 handler: async function (response) {
@@ -37,7 +37,7 @@ export default function Paywall() {
                         });
 
                         if (verification.success) {
-                            toast.success('Payment Successful! Welcome to CodeRecall. 🎉');
+                            toast.success('Payment Successful! Welcome to CodeLoop. 🎉');
                             updateUserData({ isPaid: true, isPremium: true });
                             navigate('/');
                         } else {

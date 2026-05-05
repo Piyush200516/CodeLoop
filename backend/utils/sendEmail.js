@@ -10,13 +10,16 @@ const sendEmail = async (options) => {
         throw new Error("RESEND_API_KEY is not set in environment variables");
     }
 
+    const fromEmail = process.env.FROM_EMAIL;
+    console.log("FROM_EMAIL:", fromEmail ? "Loaded" : "❌ Missing (using fallback)");
+
     const resend = new Resend(apiKey);
 
     console.log("Resend client created");
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'CodeRecall <noreply@coderecall.in>',
+            from: fromEmail || 'onboarding@resend.dev',
             to: options.email,
             subject: options.subject,
             html: options.html,

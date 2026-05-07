@@ -2,18 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Auth0Provider } from '@auth0/auth0-react';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import './index.css';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-if (!GOOGLE_CLIENT_ID) {
-    // eslint-disable-next-line no-console
-    console.warn('Missing VITE_GOOGLE_CLIENT_ID. Google login will be disabled.');
-}
+const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN;
+const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID;
 
 const toasterEl = (
     <Toaster
@@ -35,23 +31,20 @@ const toasterEl = (
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <BrowserRouter>
-            {GOOGLE_CLIENT_ID ? (
-                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                    <AuthProvider>
-                        <ThemeProvider>
-                            <App />
-                            {toasterEl}
-                        </ThemeProvider>
-                    </AuthProvider>
-                </GoogleOAuthProvider>
-            ) : (
+            <Auth0Provider
+                domain={AUTH0_DOMAIN}
+                clientId={AUTH0_CLIENT_ID}
+                authorizationParams={{
+                    redirect_uri: window.location.origin,
+                }}
+            >
                 <AuthProvider>
                     <ThemeProvider>
                         <App />
                         {toasterEl}
                     </ThemeProvider>
                 </AuthProvider>
-            )}
+            </Auth0Provider>
         </BrowserRouter>
     </React.StrictMode>
 );

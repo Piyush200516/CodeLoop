@@ -3,15 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosInstance';
 import toast from 'react-hot-toast';
-import { GoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuth0 } from "@auth0/auth0-react";
+
+
 
 export default function Login() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
+    const { loginWithRedirect } = useAuth0();
     const navigate = useNavigate();
+
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -36,27 +40,7 @@ export default function Login() {
         }
     };
 
-    const handleGoogleLogin = async (credentialResponse) => {
-        setLoading(true);
-        try {
-            const { data } = await api.post('/auth/google', {
-                token: credentialResponse.credential,
-            });
-            login(data);
-            toast.success(`Welcome, ${data.name}! 👋`);
-            const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || 'coderecallapp@gmail.com').toLowerCase().trim();
-            const isAdmin = data.email?.toLowerCase().trim() === ADMIN_EMAIL;
-            if (isAdmin || data.isPremium || data.isPaid) {
-                navigate('/');
-            } else {
-                navigate('/demo');
-            }
-        } catch (err) {
-            toast.error('Google login failed');
-        } finally {
-            setLoading(false);
-        }
-    };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 py-12">
@@ -134,15 +118,20 @@ export default function Login() {
                         </div>
 
                         <div className="flex justify-center">
-                            <GoogleLogin
-                                onSuccess={handleGoogleLogin}
-                                onError={() => toast.error('Google login failed')}
-                                useOneTap
-                                theme="filled_blue"
-                                shape="pill"
-                                width="100%"
-                            />
+                            <button
+                                type="button"
+                                onClick={() => loginWithRedirect()}
+                                className="btn-primary w-full flex items-center justify-center gap-2 py-2.5"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    'Continue with Google'
+                                )}
+                            </button>
                         </div>
+
                     </form>
 
                     <p className="text-center text-slate-400 text-sm mt-6">

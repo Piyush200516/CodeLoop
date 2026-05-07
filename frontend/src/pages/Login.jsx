@@ -13,7 +13,16 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
-    const { loginWithRedirect } = useAuth0();
+    // Auth0 is optional (skipped in main.jsx when env vars are missing)
+    const auth0 = (() => {
+        try {
+            return useAuth0();
+        } catch {
+            return null;
+        }
+    })();
+    const loginWithRedirect = auth0?.loginWithRedirect;
+
     const navigate = useNavigate();
 
 
@@ -120,10 +129,17 @@ export default function Login() {
                         <div className="flex justify-center">
                             <button
                                 type="button"
-                                onClick={() => loginWithRedirect()}
+                                onClick={() => {
+                                    if (!loginWithRedirect) {
+                                        toast.error('Auth0 is not configured. Check VITE_AUTH0_DOMAIN and VITE_AUTH0_CLIENT_ID.');
+                                        return;
+                                    }
+                                    loginWithRedirect();
+                                }}
                                 className="btn-primary w-full flex items-center justify-center gap-2 py-2.5"
                                 disabled={loading}
                             >
+
                                 {loading ? (
                                     <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (

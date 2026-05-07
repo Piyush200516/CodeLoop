@@ -36,6 +36,7 @@ const toasterEl = (
     />
 );
 
+
 const appTree = (
     <AuthProvider>
         <ThemeProvider>
@@ -45,7 +46,7 @@ const appTree = (
     </AuthProvider>
 );
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const rootTree = (
     <React.StrictMode>
         <BrowserRouter>
             {hasAuth0Config ? (
@@ -64,5 +65,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         </BrowserRouter>
     </React.StrictMode>
 );
+
+ReactDOM.createRoot(document.getElementById('root')).render(rootTree);
+
 
 

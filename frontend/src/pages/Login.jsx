@@ -4,24 +4,18 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosInstance';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth0 } from "@auth0/auth0-react";
-
-
+import Auth0LoginButton from './Auth0LoginButton';
 
 export default function Login() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
-    // Auth0 is optional (skipped in main.jsx when env vars are missing)
-    const auth0 = (() => {
-        try {
-            return useAuth0();
-        } catch {
-            return null;
-        }
-    })();
-    const loginWithRedirect = auth0?.loginWithRedirect;
+
+    const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN;
+    const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID;
+    const hasAuth0Config = Boolean(AUTH0_DOMAIN) && Boolean(AUTH0_CLIENT_ID);
+
 
     const navigate = useNavigate();
 
@@ -127,26 +121,9 @@ export default function Login() {
                         </div>
 
                         <div className="flex justify-center">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    if (!loginWithRedirect) {
-                                        toast.error('Auth0 is not configured. Check VITE_AUTH0_DOMAIN and VITE_AUTH0_CLIENT_ID.');
-                                        return;
-                                    }
-                                    loginWithRedirect();
-                                }}
-                                className="btn-primary w-full flex items-center justify-center gap-2 py-2.5"
-                                disabled={loading}
-                            >
-
-                                {loading ? (
-                                    <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                ) : (
-                                    'Continue with Google'
-                                )}
-                            </button>
+                            <Auth0LoginButton hasAuth0Config={hasAuth0Config} loading={loading} />
                         </div>
+
 
                     </form>
 

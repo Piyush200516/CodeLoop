@@ -38,15 +38,18 @@ export default function DemoPage() {
             >
                 {/* Header */}
                 <div className="text-center space-y-3">
-                    <span className="text-xs font-black uppercase tracking-[0.25em] text-brand-500 opacity-70">
-        Welcome to CodeLoop
+<span className="text-xs font-black uppercase tracking-[0.25em] text-brand-500 opacity-70">
+                        Welcome to CodeLoop
                     </span>
+
                     <h1 className="text-4xl sm:text-5xl font-black text-slate-100 tracking-tight">
                         Watch How This <span className="text-brand-500">App Works</span>
                     </h1>
+
                     <p className="text-slate-400 text-lg max-w-xl mx-auto">
                         See how CodeLoop helps you master LeetCode with spaced repetition, recall mode, and interactive visualizers.
                     </p>
+
                 </div>
 
                 {/* Video player */}

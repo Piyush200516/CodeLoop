@@ -69,7 +69,7 @@ export default function Navbar() {
                                 CR
                             </div>
                             <span className="font-bold text-slate-100 hidden sm:block whitespace-nowrap">
-                                Code<span className="text-brand-400">Recall</span>
+                                Code<span className="text-brand-400">Loop</span>
                             </span>
                         </Link>
 

@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const {registerUser, loginUser, logoutUser, getMe, verifyOTP, resendOTP, googleLogin} = reequire('../controllers/authcontroller');
-
 
 const {
   registerUser,
@@ -21,6 +19,6 @@ router.post('/verify-otp', verifyOTP);
 router.post('/resend-otp', resendOTP);
 router.post('/google', googleLogin);
 
-
 module.exports = router;
+
 

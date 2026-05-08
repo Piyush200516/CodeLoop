@@ -12,8 +12,9 @@ import './index.css';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 if (!GOOGLE_CLIENT_ID) {
-    console.warn('[Google OAuth] Missing VITE_GOOGLE_CLIENT_ID.');
+    console.error('[Google OAuth] Missing VITE_GOOGLE_CLIENT_ID. Check Vercel env vars and redeploy.');
 }
+
 
 
 const toasterEl = (
@@ -46,7 +47,7 @@ const appTree = (
 const rootTree = (
     <React.StrictMode>
         <BrowserRouter>
-            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || ''}>
+<GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
                 {appTree}
             </GoogleOAuthProvider>
         </BrowserRouter>

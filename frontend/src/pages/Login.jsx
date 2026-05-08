@@ -25,6 +25,7 @@ export default function Login() {
         try {
             const res = await api.post('/auth/google', { credential });
 
+
             login(res.data);
             toast.success(`Welcome back, ${res.data.name}! 👋`);
 

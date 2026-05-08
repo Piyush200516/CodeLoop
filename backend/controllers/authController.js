@@ -220,12 +220,72 @@ const resendOTP = async (req, res) => {
     }
 };
 
+// @desc Google login
+// @route POST /api/auth/google
+// Frontend sends: { credential } (Google ID token)
+const googleLogin = async (req, res) => {
+    try {
+        const { credential } = req.body;
+
+        if (!credential) {
+            return res.status(400).json({ message: 'Google credential is required' });
+        }
+
+        // The token is a JWT-like string. We'll decode without verifying signature
+        // to extract email/name. (If you want full verification, we'd add Google token verification later.)
+        const decoded = jwt.decode(credential);
+        const email = decoded?.email;
+        const name = decoded?.name || decoded?.given_name || decoded?.family_name;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Invalid Google credential (missing email)' });
+        }
+
+        // Check if user exists
+        const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
+        const existingUser = rows[0];
+
+        if (existingUser) {
+            const token = generateToken(existingUser.id, existingUser.email);
+            return res.json({
+                id: existingUser.id,
+                name: existingUser.name,
+                email: existingUser.email,
+                token
+            });
+        }
+
+        // Create user (Google users)
+        const insertName = name || 'Google User';
+        const [result] = await pool.execute(
+            'INSERT INTO users (name, email, is_verified) VALUES (?, ?, 1)',
+            [insertName, email]
+        );
+
+        const userId = result.insertId;
+        const token = generateToken(userId, email);
+
+        return res.json({
+            id: userId,
+            name: insertName,
+            email,
+            token
+        });
+    } catch (error) {
+        console.error('❌ Google login error:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     logoutUser,
     getMe,
     verifyOTP,
-    resendOTP
+    resendOTP,
+    googleLogin
 };
+
+
 

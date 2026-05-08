@@ -7,7 +7,8 @@ const {
   logoutUser,
   getMe,
   verifyOTP,
-  resendOTP
+  resendOTP,
+  googleLogin
 } = require('../controllers/authController');
 
 router.post('/register', registerUser);
@@ -16,6 +17,8 @@ router.post('/logout', logoutUser);
 router.get('/me', getMe);
 router.post('/verify-otp', verifyOTP);
 router.post('/resend-otp', resendOTP);
+router.post('/google', googleLogin);
+
 
 module.exports = router;
 

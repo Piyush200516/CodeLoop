@@ -224,7 +224,6 @@ const resendOTP = async (req, res) => {
 // @desc Google login
 // @route POST /api/auth/google
 // Frontend sends: { credential } (Google ID token)
-const crypto = require('crypto');
 
 const googleLogin = async (req, res) => {
     try {

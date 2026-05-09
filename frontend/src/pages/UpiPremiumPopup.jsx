@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import api from '../api/axiosInstance';
 import toast from 'react-hot-toast';
 
-const DEFAULT_UPI_ID = 'your-upi-id@bank';
+const DEFAULT_UPI_ID = 'piyushmishra21052003@okhdfcbank';
 
-export default function UpiPremiumPopup({ open, onClose, amount = 50, upiId = DEFAULT_UPI_ID }) {
+export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DEFAULT_UPI_ID }) {
   const [utr, setUtr] = useState('');
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -162,4 +162,3 @@ export default function UpiPremiumPopup({ open, onClose, amount = 50, upiId = DE
     </div>
   );
 }
-

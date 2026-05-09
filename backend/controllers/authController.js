@@ -13,6 +13,11 @@ const generateToken = (id, email) => {
 const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        console.log('[registerUser] start:', {
+            name,
+            email,
+            hasPassword: !!password
+        });
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Please fill all fields' });
@@ -27,6 +32,7 @@ const registerUser = async (req, res) => {
         // Generate OTP BEFORE touching the DB (prevents duplicate users on timeouts)
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         console.log(`🔑 Generated OTP for ${email}: ${otp}`);
+        console.log('[registerUser] OTP meta:', { email, otpLength: otp.length, otpExpiryMinutes: 10 });
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -43,13 +49,21 @@ const registerUser = async (req, res) => {
 
         // 1) Send OTP email first
         // 2) If this fails, we MUST NOT create the user
-        await sendEmail({
+        console.log('[registerUser] 📤 sendEmail about to run:', {
+            to: email,
+            subject: 'Your CodeRecall Verification Code'
+        });
+
+        const emailResult = await sendEmail({
             email,
             subject: 'Your CodeRecall Verification Code',
             html
         });
 
-        console.log(`✅ OTP sent to ${email}`);
+        console.log('[registerUser] ✅ sendEmail completed:', {
+            to: email,
+            messageId: emailResult?.messageId
+        });
 
         // Hash password AFTER email send succeeded
         const salt = await bcrypt.genSalt(10);
@@ -72,7 +86,10 @@ const registerUser = async (req, res) => {
         return res.status(201).json({ message: 'User registered. OTP sent to your email!' });
 
     } catch (error) {
-        console.error('❌ Register error:', error);
+        console.error('❌ Register error:', {
+            message: error?.message,
+            code: error?.code
+        });
         // sendEmail failures should not create a user; insertion happens only after sendEmail succeeds.
         // Return a clearer error to the frontend.
         return res.status(502).json({
@@ -300,6 +317,4 @@ module.exports = {
     resendOTP,
     googleLogin
 };
-
-
 

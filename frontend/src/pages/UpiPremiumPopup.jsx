@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../api/axiosInstance';
 import toast from 'react-hot-toast';
@@ -10,13 +10,56 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [myStatus, setMyStatus] = useState(null); // { user, payment }
+
+  const isPending = myStatus?.payment?.status === 'pending';
+  const isRejected = myStatus?.payment?.status === 'rejected';
+
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchStatus = async () => {
+      try {
+        setStatusLoading(true);
+        const res = await api.get('/payments/my-status');
+        setMyStatus(res.data);
+
+        // If already premium, close the popup / unlock
+        if (res.data?.user?.is_premium === 1) {
+          onClose?.();
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(err?.response?.data?.message || 'Failed to load payment status');
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+
+    fetchStatus();
+  }, [open]);
+
   if (!open) return null;
+
 
   const upiQrValue = encodeURIComponent(upiId);
   const upiDeepLink = `upi://pay?pa=${upiQrValue}&pn=CodeRecall%20Premium&am=${amount}&cu=INR&tn=CodeLoop%20Premium`;
 
+  // If status indicates premium, close immediately (in case popup was opened before status returned)
+  useEffect(() => {
+    if (open && myStatus?.user?.is_premium === 1) {
+      onClose?.();
+    }
+  }, [open, myStatus, onClose]);
 
   const handleSubmit = async () => {
+
+    if (isPending) {
+      toast.error('Your payment proof is already submitted. Please wait for admin verification.');
+      return;
+    }
+
     if (!utr.trim()) {
       toast.error('Enter UTR / Transaction ID');
       return;
@@ -25,6 +68,7 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
       toast.error('Upload payment screenshot');
       return;
     }
+
 
     try {
       setLoading(true);
@@ -109,41 +153,69 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
             </div>
           </div>
 
+          {(isPending || isRejected) && (
+            <div className="mb-6 p-4 rounded-2xl border border-[var(--border-muted)] bg-[var(--surface-accent)] text-left">
+              <p className="text-sm font-black" style={{ color: 'var(--text-primary)' }}>
+                {isPending
+                  ? 'Your payment proof is already submitted. Please wait for admin verification.'
+                  : 'Your previous payment was rejected. Please submit correct payment details again.'}
+              </p>
+            </div>
+          )}
+
           <div className="space-y-4 text-left">
             <label>
               <p className="text-xs uppercase tracking-widest font-black mb-2" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
                 UTR / Transaction ID
               </p>
-              <input
-                value={utr}
-                onChange={(e) => setUtr(e.target.value)}
-                placeholder="e.g. 1234567890"
-                className="w-full px-4 py-3 rounded-2xl bg-transparent border border-[var(--border-muted)] outline-none text-slate-100"
-              />
+              {!isPending ? (
+                <input
+                  value={utr}
+                  onChange={(e) => setUtr(e.target.value)}
+                  placeholder="e.g. 1234567890"
+                  className="w-full px-4 py-3 rounded-2xl bg-transparent border border-[var(--border-muted)] outline-none text-slate-100"
+                />
+              ) : (
+                <input
+                  value={utr}
+                  readOnly
+                  placeholder="Pending verification"
+                  className="w-full px-4 py-3 rounded-2xl bg-transparent border border-[var(--border-muted)] outline-none text-slate-100 opacity-60"
+                />
+              )}
             </label>
 
-            <label>
-              <p className="text-xs uppercase tracking-widest font-black mb-2" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
-                Screenshot upload
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="w-full text-slate-200"
-              />
-              {file && <p className="mt-2 text-[12px] text-slate-400">Selected: {file.name}</p>}
-            </label>
+            {!isPending && (
+              <label>
+                <p className="text-xs uppercase tracking-widest font-black mb-2" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
+                  Screenshot upload
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  className="w-full text-slate-200"
+                />
+                {file && <p className="mt-2 text-[12px] text-slate-400">Selected: {file.name}</p>}
+              </label>
+            )}
           </div>
+
 
           <div className="mt-6 flex flex-col gap-3">
             <button
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={loading || isPending || statusLoading}
               className="btn-primary w-full h-14 text-lg font-black uppercase tracking-widest shadow-xl shadow-brand-600/30 disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : 'Submit Payment'}
+              {loading ? 'Submitting...' : isPending ? 'Pending Verification' : 'Submit Payment'}
             </button>
+
+          {isPending && (
+            <p className="mt-3 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Your payment proof is already submitted. Please wait for admin verification.
+            </p>
+          )}
 
             <button
               onClick={onClose}
@@ -154,6 +226,7 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
               Cancel
             </button>
           </div>
+
 
           <p className="mt-4 text-[10px] uppercase tracking-[0.15em] font-black flex items-center justify-center gap-1.5" style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>
             <span>🔒</span> Uploaded for admin verification

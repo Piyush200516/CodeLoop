@@ -19,6 +19,29 @@ const submitPayment = async (req, res) => {
     const { amount, utr_number } = req.body;
     const screenshot = req.file;
 
+    // Prevent multiple pending payment proofs for same user
+    const [pendingRows] = await pool.execute(
+      "SELECT id FROM payments WHERE user_id = ? AND status = 'pending' LIMIT 1",
+      [userId]
+    );
+
+    if (pendingRows.length) {
+      return res.status(409).json({
+        message: 'Your payment proof is already submitted and pending verification.',
+      });
+    }
+
+    // user premium check (done after pending guard)
+    const [userRowsForPremium] = await pool.execute(
+      'SELECT id, is_premium FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (userRowsForPremium.length && userRowsForPremium[0].is_premium === 1) {
+      return res.status(400).json({ message: 'You already have premium access.' });
+    }
+
+
 
     if (!utr_number) {
       return res.status(400).json({ message: 'utr_number is required' });

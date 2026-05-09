@@ -1,21 +1,20 @@
-# TODO - Token-based UPI admin approval
+# TODO - Pending payment protection (manual UPI)
 
-- [x] Inspect/adjust MySQL `payments` schema usage for required columns: `approval_token` and `reviewed_at`.
-- [x] Update backend `submitPayment` to generate `approval_token`, save it, and email admin with approve/reject links.
-- [x] Add public token-based endpoints:
-  - [x] `GET /api/payments/email-approve/:token`
-  - [x] `GET /api/payments/email-reject/:token`
-- [x] Implement approve behavior:
-  - [x] Update `payments.status='approved'`, `payments.approved_at=NOW()`
-  - [x] Update `payments.reviewed_at = NOW()`
-  - [x] Unlock premium in `users`
-  - [x] Return required HTML success message
-- [x] Implement reject behavior:
-  - [x] Update `payments.status='rejected'`, `reviewed_at=NOW()`
-  - [x] Return required HTML rejected message
-- [x] Implement "Payment already processed" behavior for repeat clicks.
-- [x] Update frontend `UpiPremiumPopup.jsx` to show: "Payment proof submitted. Admin will verify soon."
-- [x] Run/verify backend start + sanity-check email HTML/link construction.
+- [ ] Backend: Update `backend/controllers/paymentController.js`
+  - [ ] In `submitPayment`, check for existing `payments` row with `status='pending'` for logged-in `user_id` before insert
+  - [ ] If pending exists: return 409 `{ message: "Your payment proof is already submitted and pending verification." }`
+  - [ ] Ensure no insert and no admin email is sent when pending exists
+  - [ ] If user already premium: return 400 `{ message: "You already have premium access." }`
+  - [ ] Keep amount validation at ₹30 and screenshot required
 
+- [ ] Frontend: Update `frontend/src/pages/UpiPremiumPopup.jsx`
+  - [ ] On popup open, call `GET /api/payments/my-status`
+  - [ ] If pending: show pending message, disable submit, hide UTR + screenshot upload
+  - [ ] If rejected: show rejected message, allow inputs and resubmit
+  - [ ] If user is premium: close popup/unlock
 
+- [ ] Verification
+  - [ ] Start backend and test submit twice: second attempt returns 409
+  - [ ] Open popup when pending: inputs hidden and submit disabled
+  - [ ] Open popup when rejected: inputs visible and submit enabled
 

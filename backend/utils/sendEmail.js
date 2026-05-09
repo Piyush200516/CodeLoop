@@ -1,46 +1,60 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
-    const apiKey = process.env.RESEND_API_KEY;
-
-    // Step 1 — Check env variable
-    console.log("RESEND_API_KEY:", apiKey ? "Loaded" : "❌ Missing");
-
-    if (!apiKey) {
-        throw new Error("RESEND_API_KEY is not set in environment variables");
+    if (!options?.email) {
+        throw new Error('sendEmail: options.email is required');
+    }
+    if (!options?.subject) {
+        throw new Error('sendEmail: options.subject is required');
+    }
+    if (!options?.html) {
+        throw new Error('sendEmail: options.html is required');
     }
 
-    const fromEmail = process.env.FROM_EMAIL;
-    console.log("FROM_EMAIL:", fromEmail ? "Loaded" : "❌ Missing (using fallback)");
+    const {
+        SMTP_HOST,
+        SMTP_PORT,
+        SMTP_USER,
+        SMTP_PASS,
+        FROM_EMAIL,
+    } = process.env;
 
-    const resend = new Resend(apiKey);
+    // Validate required env vars (fail fast)
+    if (!SMTP_HOST) throw new Error('SMTP_HOST is not set in environment variables');
+    if (!SMTP_PORT) throw new Error('SMTP_PORT is not set in environment variables');
+    if (!SMTP_USER) throw new Error('SMTP_USER is not set in environment variables');
+    if (!SMTP_PASS) throw new Error('SMTP_PASS is not set in environment variables');
+    if (!FROM_EMAIL) throw new Error('FROM_EMAIL is not set in environment variables');
 
-    console.log("Resend client created");
+    const transporter = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: Number(SMTP_PORT),
+        secure: false, // STARTTLS for 587
+        auth: {
+            user: SMTP_USER,
+            pass: SMTP_PASS,
+        },
+        // Brevo supports standard SMTP; no special TLS config by default.
+        // If you ever hit TLS errors, you can set tls: { rejectUnauthorized: false }
+    });
 
     try {
-        const { data, error } = await resend.emails.send({
-            from: fromEmail || 'onboarding@resend.dev',
+        const info = await transporter.sendMail({
+            from: FROM_EMAIL,
             to: options.email,
             subject: options.subject,
             html: options.html,
         });
 
-        if (error) {
-            console.error("❌ EMAIL SEND FAILED");
-            console.error("Error:", error);
-            throw new Error(error.message || "Resend email failed");
-        }
-
-        console.log("✅ EMAIL SENT SUCCESSFULLY");
-        console.log("Email ID:", data?.id);
-
+        console.log('✅ EMAIL SENT SUCCESSFULLY');
+        console.log('MessageId:', info?.messageId);
     } catch (error) {
-        console.error("❌ EMAIL SEND FAILED");
-        console.error("Error name:", error.name);
-        console.error("Error message:", error.message);
-        console.error("Full error:", error);
+        console.error('❌ EMAIL SEND FAILED');
+        console.error('Error message:', error?.message);
+        console.error('Full error:', error);
         throw error;
     }
 };
 
 module.exports = sendEmail;
+

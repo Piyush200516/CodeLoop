@@ -13,7 +13,8 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
   if (!open) return null;
 
   const upiQrValue = encodeURIComponent(upiId);
-  const upiDeepLink = `upi://pay?pa=${upiQrValue}&pn=CodeRecall%20Premium&am=${amount}&cu=INR&tn=UPI%20Premium%20Payment`;
+  const upiDeepLink = `upi://pay?pa=${upiQrValue}&pn=CodeRecall%20Premium&am=${amount}&cu=INR&tn=CodeLoop%20Premium`;
+
 
   const handleSubmit = async () => {
     if (!utr.trim()) {

@@ -20,6 +20,12 @@ const submitPayment = async (req, res) => {
       return res.status(400).json({ message: 'amount must be a positive number' });
     }
 
+    // Expected premium manual UPI amount
+    if (parsedAmount !== 30) {
+      return res.status(400).json({ message: 'Invalid amount. Expected ₹30.' });
+    }
+
+
     if (!screenshot) {
       return res.status(400).json({ message: 'screenshot is required' });
     }

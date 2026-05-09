@@ -45,7 +45,7 @@ export default function Paywall() {
           <div className="p-6 rounded-2xl border border-[var(--border-muted)] bg-[var(--surface-accent)] text-left">
             <p className="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">How it works</p>
             <div className="space-y-2 text-slate-200 text-sm">
-              <p>1) Pay ₹50 using any UPI app</p>
+              <p>1) Pay ₹30 using any UPI app</p>
               <p>2) Copy your UTR / Transaction ID</p>
               <p>3) Upload screenshot and submit</p>
               <p>4) Admin approves → Premium unlocked</p>
@@ -56,7 +56,7 @@ export default function Paywall() {
             onClick={() => setOpenUpi(true)}
             className="w-full btn-primary h-16 text-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-brand-600/30"
           >
-            Continue with UPI ₹50 <span className="text-xl">⚡</span>
+            Continue with UPI ₹30 <span className="text-xl">⚡</span>
           </button>
 
           <p className="text-xs text-slate-400">Premium access is unlocked after admin approval.</p>
@@ -66,8 +66,8 @@ export default function Paywall() {
       <UpiPremiumPopup
         open={openUpi}
         onClose={() => setOpenUpi(false)}
-        amount={50}
-        upiId={import.meta.env.VITE_UPI_ID || 'your-upi-id@bank'}
+        amount={30}
+        upiId={'piyushmishra21052003@okhdfcbank'}
       />
 
     </div>

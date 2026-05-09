@@ -68,7 +68,7 @@ export default function Pricing() {
               <li className="flex items-center gap-2">✅ Detailed Progress Analytics</li>
             </ul>
 
-            <div className="mt-10 text-3xl font-bold text-slate-100">₹50</div>
+            <div className="mt-10 text-3xl font-bold text-slate-100">₹30</div>
             <p className="text-xs text-slate-500 mt-1">one-time payment • lifetime (admin approval)</p>
 
             <button

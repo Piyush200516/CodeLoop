@@ -223,6 +223,8 @@ const resendOTP = async (req, res) => {
 // @desc Google login
 // @route POST /api/auth/google
 // Frontend sends: { credential } (Google ID token)
+const crypto = require('crypto');
+
 const googleLogin = async (req, res) => {
     try {
         const { credential } = req.body;
@@ -257,9 +259,15 @@ const googleLogin = async (req, res) => {
 
         // Create user (Google users)
         const insertName = name || 'Google User';
+
+        // Generate secure random password (must be stored because `users.password` is NOT NULL)
+        const randomPassword = crypto.randomBytes(32).toString('hex');
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(randomPassword, salt);
+
         const [result] = await pool.execute(
-            'INSERT INTO users (name, email, is_verified) VALUES (?, ?, 1)',
-            [insertName, email]
+            'INSERT INTO users (name, email, password, is_verified) VALUES (?, ?, ?, 1)',
+            [insertName, email, hashedPassword]
         );
 
         const userId = result.insertId;

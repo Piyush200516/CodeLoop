@@ -57,7 +57,6 @@ A full-stack application to track LeetCode problems and schedule smart revisions
 - **Visual Studio Code**
 - **Git & GitHub**
 - **Postman**
-- **Blackbox AI**
 ---
 
 ## 🚀 Getting Started

@@ -1,0 +1,165 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import api from '../api/axiosInstance';
+import toast from 'react-hot-toast';
+
+const DEFAULT_UPI_ID = 'your-upi-id@bank';
+
+export default function UpiPremiumPopup({ open, onClose, amount = 50, upiId = DEFAULT_UPI_ID }) {
+  const [utr, setUtr] = useState('');
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  if (!open) return null;
+
+  const upiQrValue = encodeURIComponent(upiId);
+  const upiDeepLink = `upi://pay?pa=${upiQrValue}&pn=CodeRecall%20Premium&am=${amount}&cu=INR&tn=UPI%20Premium%20Payment`;
+
+  const handleSubmit = async () => {
+    if (!utr.trim()) {
+      toast.error('Enter UTR / Transaction ID');
+      return;
+    }
+    if (!file) {
+      toast.error('Upload payment screenshot');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const form = new FormData();
+      // backend expects multipart field name: screenshot
+      form.append('amount', String(amount));
+      form.append('utr_number', utr.trim());
+      form.append('screenshot', file);
+
+      await api.post('/payments/submit', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      toast.success('UPI payment submitted! Waiting for admin approval.');
+      onClose?.();
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || 'Payment submission failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-sm">
+      <motion.div
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 12 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+        className="relative w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)' }}
+      >
+        <div className="p-6 sm:p-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-brand-500/20 to-indigo-500/20 border border-brand-500/30 mb-5 shadow-lg shadow-brand-500/10">
+            <span className="text-3xl">💸</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-black mb-2" style={{ color: 'var(--text-primary)' }}>
+            Pay via UPI to unlock Premium
+          </h2>
+          <p className="text-sm sm:text-base mb-6" style={{ color: 'var(--text-secondary)' }}>
+            Amount: <span className="font-black">₹{amount}</span> (Lifetime Premium)
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start mb-6">
+            <div className="text-left">
+              <p className="text-xs uppercase tracking-widest font-black mb-2" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
+                UPI ID
+              </p>
+              <p className="font-mono text-sm sm:text-base break-all text-slate-100">{upiId}</p>
+
+              <a
+                className="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-black transition-colors w-full sm:w-auto"
+                href={upiDeepLink}
+              >
+                Open UPI App
+              </a>
+
+              <p className="mt-3 text-[11px] text-slate-400">
+                After payment, enter your UTR / Transaction ID below.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <img
+                className="rounded-2xl border border-[var(--border-muted)] bg-white/5 p-2"
+                width={180}
+                height={180}
+                alt="UPI QR"
+                src={`https://quickchart.io/qr?text=${encodeURIComponent(`upi://pay?pa=${upiId}&am=${amount}&cu=INR`)}&size=180`}
+              />
+              <p className="mt-2 text-[11px] text-slate-400">Scan QR in any UPI app</p>
+            </div>
+          </div>
+
+          <div className="space-y-4 text-left">
+            <label>
+              <p className="text-xs uppercase tracking-widest font-black mb-2" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
+                UTR / Transaction ID
+              </p>
+              <input
+                value={utr}
+                onChange={(e) => setUtr(e.target.value)}
+                placeholder="e.g. 1234567890"
+                className="w-full px-4 py-3 rounded-2xl bg-transparent border border-[var(--border-muted)] outline-none text-slate-100"
+              />
+            </label>
+
+            <label>
+              <p className="text-xs uppercase tracking-widest font-black mb-2" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
+                Screenshot upload
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="w-full text-slate-200"
+              />
+              {file && <p className="mt-2 text-[12px] text-slate-400">Selected: {file.name}</p>}
+            </label>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-3">
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="btn-primary w-full h-14 text-lg font-black uppercase tracking-widest shadow-xl shadow-brand-600/30 disabled:opacity-50"
+            >
+              {loading ? 'Submitting...' : 'Submit Payment'}
+            </button>
+
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="w-full bg-transparent hover:bg-black/5 font-bold py-3 px-6 rounded-2xl transition-all text-sm"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Cancel
+            </button>
+          </div>
+
+          <p className="mt-4 text-[10px] uppercase tracking-[0.15em] font-black flex items-center justify-center gap-1.5" style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>
+            <span>🔒</span> Uploaded for admin verification
+          </p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+

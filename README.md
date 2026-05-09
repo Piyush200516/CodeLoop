@@ -15,16 +15,49 @@ A full-stack application to track LeetCode problems and schedule smart revisions
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ 🛠️ Tech Stack & Infrastructure
 
-| Layer     | Technology                      |
-|-----------|--------------------------------|
-| Frontend  | React 18 + Vite + Tailwind CSS |
-| Backend   | Node.js + Express              |
-| Database  | MySQL (mysql2)                 |
-| Auth      | JWT + bcryptjs                 |
-| Charts    | Recharts                       |
+### Frontend
+- **React.js** – Modern UI development
+- **Vite** – Fast frontend build tool
+- **JavaScript (ES6+)** – Application logic
+- **Tailwind CSS** – Responsive UI styling
+- **Axios** – API communication
+- **React Router DOM** – Client-side routing
 
+### Backend
+- **Node.js** – Server runtime
+- **Express.js** – REST API development
+- **JWT (JSON Web Tokens)** – Secure authentication
+- **bcrypt.js** – Password hashing & security
+- **Nodemailer** – Email service integration
+
+### Database
+- **MySQL** – Relational database management
+- **Railway** – Cloud database hosting
+
+### Authentication & Security
+- **Email OTP Verification**
+- **Google OAuth Authentication**
+- **Password Encryption**
+- **Session Token Management**
+
+### Email Infrastructure
+- **Brevo SMTP** – Transactional email delivery for OTP verification
+
+### Cloud Deployment
+- **Vercel** – Frontend hosting
+- **Render** – Backend hosting
+- **Railway** – Managed MySQL database
+
+### Monitoring & Reliability
+- **UptimeRobot** – Backend uptime monitoring & keep-alive checks
+
+### Development Tools
+- **Visual Studio Code**
+- **Git & GitHub**
+- **Postman**
+- **Blackbox AI**
 ---
 
 ## 🚀 Getting Started
@@ -56,7 +89,7 @@ PORT=5000
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_mysql_password
-DB_NAME=coderecall_db
+DB_NAME= your_database_name
 
 JWT_SECRET=your_generated_secret
 

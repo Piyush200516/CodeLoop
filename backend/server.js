@@ -12,10 +12,18 @@ app.use(express.json({ extended: false }));
 // Auth middleware
 const { protect } = require('./middleware/authMiddleware');
 
+// Uploads static serving
+const path = require('path');
+app.use('/uploads', require('express').static(path.join(__dirname, 'uploads')));
+
+
 // Core LeetCode Tracker Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/problems', protect, require('./routes/problemRoutes'));
 app.use('/api/dashboard', protect, require('./routes/dashboardRoutes'));
+app.use('/api/payments', protect, require('./routes/paymentRoutes'));
+app.use('/api/admin', protect, require('./routes/adminRoutes'));
+
 
 // Health check
 app.get('/', (req, res) => res.json({ message: '🚀 CodeRecall LeetCode Tracker API running (MySQL)' }));

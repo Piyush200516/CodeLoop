@@ -1,94 +1,111 @@
-const User = require('../models/User');
-const Payment = require('../models/Payment');
+const { pool } = require('../config/db');
 
-// @desc    Get all users
-// @route   GET /api/admin/users
-// @access  Private/Admin
-const getUsers = async (req, res) => {
-    try {
-        const users = await User.find({}).select('-password');
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
+const isAdminUser = async (userId) => {
+  const [adminRows] = await pool.execute(
+    'SELECT email FROM users WHERE id = ?',
+    [userId]
+  );
+  const currentEmail = adminRows[0]?.email;
+  return process.env.ADMIN_EMAIL && currentEmail === process.env.ADMIN_EMAIL;
 };
 
-// @desc    Get all payments
-// @route   GET /api/admin/payments
-// @access  Private/Admin
-const getPayments = async (req, res) => {
-    try {
-        const payments = await Payment.find({})
-            .populate('userId', 'name email')
-            .sort({ createdAt: -1 });
-        res.json(payments);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+const listPendingPayments = async (req, res) => {
+  try {
+    if (!(await isAdminUser(req.user.id))) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
+
+    const [rows] = await pool.execute(
+      `SELECT p.id, p.user_id, p.amount, p.utr_number, p.screenshot_url, p.status, p.created_at, p.approved_at, u.email
+       FROM payments p
+       JOIN users u ON u.id = p.user_id
+       WHERE p.status = 'pending'
+       ORDER BY p.created_at DESC`
+    );
+
+    return res.json(rows);
+  } catch (err) {
+    console.error('listPendingPayments error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 };
 
-// @desc    Get dashboard statistics
-// @route   GET /api/admin/stats
-// @access  Private/Admin
-const getDashboardStats = async (req, res) => {
-    try {
-        const totalUsers = await User.countDocuments({});
-        const payments = await Payment.find({ status: 'paid' });
-        
-        const totalRevenue = payments.reduce((acc, curr) => acc + curr.amount, 0);
-        const totalTransactions = payments.length;
+// POST /api/admin/payments/approve/:id
+const approvePayment = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-        res.json({
-            totalUsers,
-            totalRevenue,
-            totalTransactions
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+    if (!(await isAdminUser(req.user.id))) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
+
+    // Ensure this is still pending
+    const [paymentRows] = await pool.execute(
+      'SELECT user_id FROM payments WHERE id = ? AND status = "pending"',
+      [id]
+    );
+
+    if (!paymentRows.length) {
+      return res.status(404).json({ message: 'Pending payment not found' });
+    }
+
+    const userId = paymentRows[0].user_id;
+
+    // Transaction: approve payment + unlock premium
+    await pool.execute('START TRANSACTION');
+    try {
+      await pool.execute(
+        'UPDATE payments SET status = "approved", approved_at = NOW() WHERE id = ?',
+        [id]
+      );
+
+      await pool.execute(
+        "UPDATE users SET is_premium = 1, premium_plan = 'lifetime', premium_expiry = NULL WHERE id = ?",
+        [userId]
+      );
+
+      await pool.execute('COMMIT');
+    } catch (e) {
+      await pool.execute('ROLLBACK');
+      throw e;
+    }
+
+    return res.json({ message: 'Payment approved successfully' });
+  } catch (err) {
+    console.error('approvePayment error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 };
 
-// @desc    Delete payment
-// @route   DELETE /api/admin/payment/:id
-// @access  Private/Admin
-const deletePayment = async (req, res) => {
-    try {
-        const payment = await Payment.findByIdAndDelete(req.params.id);
+// POST /api/admin/payments/reject/:id
+const rejectPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-        if (!payment) {
-            return res.status(404).json({ message: 'Payment not found' });
-        }
-
-        res.json({ message: 'Payment deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+    if (!(await isAdminUser(req.user.id))) {
+      return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
-};
 
-// @desc    Delete user
-// @route   DELETE /api/admin/user/:id
-// @access  Private/Admin
-const deleteUser = async (req, res) => {
-    try {
-        const user = await User.findByIdAndDelete(req.params.id);
+    const [result] = await pool.execute(
+      'UPDATE payments SET status = "rejected" WHERE id = ? AND status = "pending"',
+      [id]
+    );
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Optional: Also clean up related datasets like their Payments
-        await Payment.deleteMany({ userId: req.params.id });
-
-        res.json({ message: 'User deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Pending payment not found' });
     }
+
+    return res.json({ message: 'Payment rejected successfully' });
+  } catch (err) {
+    console.error('rejectPayment error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 };
 
 module.exports = {
-    getUsers,
-    getPayments,
-    getDashboardStats,
-    deleteUser,
-    deletePayment
+  listPendingPayments,
+  approvePayment,
+  rejectPayment,
 };
+
+

@@ -1,82 +1,84 @@
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
-const Payment = require('../models/Payment');
+const path = require('path');
+const { pool } = require('../config/db');
 
-const User = require('../models/User');
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// POST /api/payments/submit
+// body: user_id (ignored; taken from auth token), amount, utr_number
+// file: screenshot
+const submitPayment = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { amount, utr_number } = req.body;
+    const screenshot = req.file;
 
-// @desc    Create a new order
-// @route   POST /api/payment/create-order
-// @access  Private
-const createOrder = async (req, res) => {
-    const { amount } = req.body;
-
-    const options = {
-        amount: amount * 100, // amount in the smallest currency unit
-        currency: 'INR',
-        receipt: `receipt_order_${Date.now()}`,
-    };
-
-    try {
-        const order = await razorpay.orders.create(options);
-        
-        // Save initial payment record
-        await Payment.create({
-            userId: req.user._id,
-            amount: amount,
-            orderId: order.id,
-            status: 'created'
-        });
-
-        res.json(order);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Order creation failed' });
+    if (!utr_number) {
+      return res.status(400).json({ message: 'utr_number is required' });
     }
+
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: 'amount must be a positive number' });
+    }
+
+    if (!screenshot) {
+      return res.status(400).json({ message: 'screenshot is required' });
+    }
+
+    // screenshot_url should be a URL path client can access
+    // We serve /uploads statically from backend/server.js
+    const screenshotUrl = `/uploads/upi/${path.basename(screenshot.path)}`;
+
+    // Insert into MySQL payments table
+    const [result] = await pool.execute(
+      'INSERT INTO payments (user_id, amount, utr_number, screenshot_url, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+      [userId, parsedAmount, utr_number, screenshotUrl, 'pending']
+    );
+
+    return res.status(201).json({
+      message: 'Payment submitted successfully',
+      paymentId: result.insertId,
+    });
+  } catch (err) {
+    console.error('submitPayment error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 };
 
-// @desc    Verify payment signature
-// @route   POST /api/payment/verify
-// @access  Private
-const verifyPayment = async (req, res) => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+// GET /api/payments/my-status
+const getMyStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-    hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
-    const generated_signature = hmac.digest('hex');
+    // users: is_premium, premium_plan, premium_expiry
+    const [userRows] = await pool.execute(
+      'SELECT id, is_premium, premium_plan, premium_expiry FROM users WHERE id = ?',
+      [userId]
+    );
 
-    if (generated_signature === razorpay_signature) {
-        try {
-            // Update payment record
-            const payment = await Payment.findOneAndUpdate(
-                { orderId: razorpay_order_id },
-                {
-                    paymentId: razorpay_payment_id,
-                    signature: razorpay_signature,
-                    status: 'paid'
-                },
-                { new: true } // Return the updated document so we can get its userId
-            );
+    if (!userRows.length) return res.status(404).json({ message: 'User not found' });
 
-            // ACTUAL FIX: Update the actual User doc's status
-             if (payment && payment.userId) {
-                await User.findByIdAndUpdate(payment.userId, { isPaid: true, isPremium: true });
-            }
+    // Current payment status (most recent)
+    const [paymentRows] = await pool.execute(
+      'SELECT id, amount, utr_number, screenshot_url, status, created_at, approved_at FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+      [userId]
+    );
 
-            res.json({ message: 'Payment verified successfully', success: true });
-        } catch (error) {
-            res.status(500).json({ message: 'Payment verification update failed' });
-        }
-    } else {
-        res.status(400).json({ message: 'Invalid signature', success: false });
-    }
+    return res.json({
+      user: {
+        is_premium: userRows[0].is_premium,
+        premium_plan: userRows[0].premium_plan,
+        premium_expiry: userRows[0].premium_expiry,
+      },
+      payment: paymentRows[0] || null,
+    });
+  } catch (err) {
+    console.error('getMyStatus error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 };
 
 module.exports = {
-    createOrder,
-    verifyPayment
+  submitPayment,
+  getMyStatus,
 };
+

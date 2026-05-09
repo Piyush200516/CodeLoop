@@ -38,7 +38,7 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success('UPI payment submitted! Waiting for admin approval.');
+      toast.success('Payment proof submitted. Admin will verify soon.');
       onClose?.();
     } catch (err) {
       console.error(err);

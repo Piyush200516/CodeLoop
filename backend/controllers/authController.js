@@ -24,29 +24,10 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create user
-        const [result] = await pool.execute(
-            'INSERT INTO users (name, email, password, is_verified) VALUES (?, ?, ?, 0)',
-            [name, email, hashedPassword]
-        );
-
-        const userId = result.insertId;
-
-        // Generate OTP
+        // Generate OTP BEFORE touching the DB (prevents duplicate users on timeouts)
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         console.log(`🔑 Generated OTP for ${email}: ${otp}`);
 
-        // Store OTP (10 min expiry)
-        await pool.execute(
-            'UPDATE users SET otp = ?, otp_expiry = DATE_ADD(NOW(), INTERVAL 10 MINUTE) WHERE id = ?',
-            [otp, userId]
-        );
-
-        // Send OTP email
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: #4F46E5;">Welcome to CodeRecall! 🎉</h2>
@@ -60,6 +41,8 @@ const registerUser = async (req, res) => {
             </div>
         `;
 
+        // 1) Send OTP email first
+        // 2) If this fails, we MUST NOT create the user
         await sendEmail({
             email,
             subject: 'Your CodeRecall Verification Code',
@@ -67,11 +50,34 @@ const registerUser = async (req, res) => {
         });
 
         console.log(`✅ OTP sent to ${email}`);
-        res.status(201).json({ message: 'User registered. OTP sent to your email!' });
+
+        // Hash password AFTER email send succeeded
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create user only after email sending success
+        const [result] = await pool.execute(
+            'INSERT INTO users (name, email, password, is_verified) VALUES (?, ?, ?, 0)',
+            [name, email, hashedPassword]
+        );
+
+        const userId = result.insertId;
+
+        // Store OTP (10 min expiry)
+        await pool.execute(
+            'UPDATE users SET otp = ?, otp_expiry = DATE_ADD(NOW(), INTERVAL 10 MINUTE) WHERE id = ?',
+            [otp, userId]
+        );
+
+        return res.status(201).json({ message: 'User registered. OTP sent to your email!' });
 
     } catch (error) {
         console.error('❌ Register error:', error);
-        res.status(500).json({ message: error.message });
+        // sendEmail failures should not create a user; insertion happens only after sendEmail succeeds.
+        // Return a clearer error to the frontend.
+        return res.status(502).json({
+            message: error?.message || 'Registration failed'
+        });
     }
 };
 

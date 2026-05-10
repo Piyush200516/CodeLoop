@@ -40,18 +40,17 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
     fetchStatus();
   }, [open]);
 
-  if (!open) return null;
-
-
-  const upiQrValue = encodeURIComponent(upiId);
-  const upiDeepLink = `upi://pay?pa=${upiQrValue}&pn=CodeRecall%20Premium&am=${amount}&cu=INR&tn=CodeLoop%20Premium`;
-
   // If status indicates premium, close immediately (in case popup was opened before status returned)
   useEffect(() => {
     if (open && myStatus?.user?.is_premium === 1) {
       onClose?.();
     }
   }, [open, myStatus, onClose]);
+
+  if (!open) return null;
+
+  const upiQrValue = encodeURIComponent(upiId);
+  const upiDeepLink = `upi://pay?pa=${upiQrValue}&pn=CodeRecall%20Premium&am=${amount}&cu=INR&tn=CodeLoop%20Premium`;
 
   const handleSubmit = async () => {
 

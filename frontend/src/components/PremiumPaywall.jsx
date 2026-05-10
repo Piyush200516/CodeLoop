@@ -12,11 +12,15 @@ const PremiumPaywall = ({ isOpen, onClose, featureName, description }) => {
 
     useEffect(() => {
         if (isOpen && featureName) {
-            // Track paywall hit
-            api.post('/analytics/track-interaction', {
-                featureName,
-                interactionType: 'paywall_view'
-            }).catch(console.error);
+            // Track paywall hit (endpoint may not exist in some deployments)
+            try {
+                api.post('/analytics/track-interaction', {
+                    featureName,
+                    interactionType: 'paywall_view'
+                }).catch(() => {});
+            } catch (e) {
+                // Never block UI
+            }
         }
     }, [isOpen, featureName]);
 
@@ -149,10 +153,18 @@ const PremiumPaywall = ({ isOpen, onClose, featureName, description }) => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => {
-                                api.post('/analytics/track-interaction', {
-                                    featureName: featureName || 'general',
-                                    interactionType: 'click_locked'
-                                }).catch(console.error);
+                                // Tracking is best-effort; never block payment navigation
+                                try {
+                                    api
+                                        .post('/analytics/track-interaction', {
+                                            featureName: featureName || 'general',
+                                            interactionType: 'click_locked',
+                                        })
+                                        .catch(() => {});
+                                } catch (e) {
+                                    // ignore
+                                }
+
                                 onClose();
                                 navigate('/paywall');
                             }}

@@ -23,6 +23,7 @@ app.use('/api/problems', protect, require('./routes/problemRoutes'));
 app.use('/api/dashboard', protect, require('./routes/dashboardRoutes'));
 app.use('/api/payments', protect, require('./routes/paymentRoutes'));
 app.use('/api/admin', protect, require('./routes/adminRoutes'));
+app.use('/api/usage', require('./routes/usageRoutes'));
 
 
 // Health check

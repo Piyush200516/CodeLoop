@@ -60,10 +60,11 @@ export default function CodeVisualizerPage() {
         setError(null);
 
         try {
-            // Check usage limit on backend
-            const { data } = await api.post('/usage/code-execution');
-            
-            // If backend allows (success: true), proceed with local generation
+            // Check usage limit on backend (still needed for paywall)
+            // Local JS tracing is always generated end-to-end if the limit check succeeds.
+            await api.post('/usage/code-execution');
+
+            // Proceed with local generation
             const result = generateSteps(code, language);
             if (result.error) {
                 setError(result.error);

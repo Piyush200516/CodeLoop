@@ -79,8 +79,9 @@ const PremiumPaywall = ({ isOpen, onClose, featureName, description }) => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
                         className="text-sm sm:text-base font-bold mb-2 tracking-wide"
-                        style={{ color: 'var(--brand-color, #0ea5e9)' }}
+                        style={{ color: 'var(--brand-color)' }}
                     >
+
                         You're making great progress 🚀 Don't let limits slow you down.
                     </motion.p>
 

@@ -82,18 +82,21 @@ export default function Login() {
 
             <div className="w-full max-w-md animate-slide-up">
                 {/* Logo & Header */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-600 rounded-2xl shadow-2xl shadow-brand-600/40 mb-4">
+                <div className="text-center mb-9">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-600 rounded-2xl shadow-2xl shadow-brand-600/40 mb-4 relative">
                         <span className="text-2xl font-bold text-white">CR</span>
+                        <div className="absolute -inset-2 bg-brand-600/20 blur-xl rounded-2xl -z-10" />
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-100 italic tracking-tight">
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-slate-100 tracking-tight">
                         Code<span className="text-brand-400">Loop</span>
                     </h1>
-                    <p className="text-slate-400 mt-1">Master LeetCode with spaced repetition</p>
+                    <p className="text-slate-400 mt-2 text-sm md:text-base">Master LeetCode with spaced repetition</p>
                 </div>
 
-                <div className="card shadow-2xl border-white/5">
-                    <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
+                <div className="card shadow-2xl border-white/5 relative overflow-hidden">
+                    <div className="absolute -top-20 -right-20 w-56 h-56 rounded-full bg-brand-600/10 blur-2xl" />
+                    <form onSubmit={handleSubmit} className="relative space-y-5" autoComplete="off">
+
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
                             <input

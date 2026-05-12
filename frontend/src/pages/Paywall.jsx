@@ -27,7 +27,7 @@ export default function Paywall() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-2xl w-full card glass p-8 text-center border-brand-500/20 relative z-10 shadow-xl"
+        className="max-w-2xl w-full card glass p-8 text-center border-brand-500/20 relative z-10 shadow-xl sheen"
       >
         <div className="mb-6">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-brand-600 rounded-3xl shadow-2xl shadow-brand-600/40 mb-4">
@@ -43,21 +43,21 @@ export default function Paywall() {
 
         <div className="space-y-6">
           <div className="p-6 rounded-2xl border border-[var(--border-muted)] bg-[var(--surface-accent)] text-left">
-            <p className="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">How it works</p>
-            <div className="space-y-2 text-slate-200 text-sm">
-              <p>1) Pay ₹30 using any UPI app</p>
-              <p>2) Copy your UTR / Transaction ID</p>
-              <p>3) Upload screenshot and submit</p>
-              <p>4) Admin approves → Premium unlocked</p>
+              <p className="text-xs uppercase tracking-widest text-slate-400 font-black mb-4">How it works</p>
+              <div className="space-y-3 text-slate-200 text-sm">
+                <p className="check-row">Pay ₹30 using any UPI app</p>
+                <p className="check-row">Copy your UTR / Transaction ID</p>
+                <p className="check-row">Upload screenshot and submit</p>
+                <p className="check-row">Admin approves → Premium unlocked</p>
+              </div>
             </div>
-          </div>
 
-          <button
-            onClick={() => setOpenUpi(true)}
-            className="w-full btn-primary h-16 text-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-brand-600/30"
-          >
-            Continue with UPI ₹30 <span className="text-xl">⚡</span>
-          </button>
+            <button
+              onClick={() => setOpenUpi(true)}
+              className="w-full btn-primary h-16 text-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-brand-600/30 sheen"
+            >
+              Continue with UPI ₹30 <span className="text-xl">⚡</span>
+            </button>
 
           <p className="text-xs text-slate-400">Premium access is unlocked after admin approval.</p>
         </div>

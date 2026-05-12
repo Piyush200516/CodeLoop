@@ -81,17 +81,18 @@ export default function Navbar() {
                                     to={link.to}
                                     title={link.label}
                                     onClick={(e) => handleLinkClick(e, link)}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${isActive(link.to)
-                                        ? 'bg-brand-600/20 text-brand-400 border border-brand-500/30'
-                                        : 'text-slate-400 hover:text-brand-400 hover:bg-brand-500/10'
+                                    className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 border ${isActive(link.to)
+                                        ? 'bg-brand-600/20 text-brand-400 border-brand-500/40 shadow-[0_0_0_1px_rgba(14,165,233,0.10)]'
+                                        : 'text-slate-400/90 hover:text-brand-400 hover:bg-brand-500/10 border-transparent hover:border-brand-500/20'
                                         }`}
                                 >
-                                    <span>{link.icon}</span>
+                                    <span className="text-base leading-none">{link.icon}</span>
                                     <span className="hidden xl:inline">{link.label}</span>
                                     {link.isPremium && !isPremiumUser && <span className="text-[10px]">🔒</span>}
                                 </Link>
                             ))}
                         </div>
+
                     </div>
 
                     {/* Right side stuff */}
@@ -108,13 +109,15 @@ export default function Navbar() {
                             <button
                                 onClick={() => setDropdownOpen(!dropdownOpen)}
                                 className="hidden sm:flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all flex-shrink-0"
+                                aria-label="Open profile menu"
                             >
-                                <div className="w-7 h-7 bg-brand-600/30 rounded-full flex items-center justify-center text-brand-400 font-bold text-xs border border-brand-500/30">
+                                <div className="w-7 h-7 bg-brand-600/30 rounded-full flex items-center justify-center text-brand-400 font-bold text-xs border border-brand-500/30 shadow-sm">
                                     {user?.name?.[0]?.toUpperCase()}
                                 </div>
-                                <span className="font-medium text-slate-300 text-sm hidden md:inline max-w-[100px] truncate">{user?.name}</span>
+                                <span className="font-medium text-slate-300 text-sm hidden md:inline max-w-[110px] truncate">{user?.name}</span>
                                 <span className="text-[10px] text-slate-500">▼</span>
                             </button>
+
 
                             <AnimatePresence>
                                 {dropdownOpen && (

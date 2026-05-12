@@ -141,14 +141,16 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
             </div>
 
             <div className="flex flex-col items-center">
-              <img
-                className="rounded-2xl border border-[var(--border-muted)] bg-white/5 p-2"
-                width={180}
-                height={180}
-                alt="UPI QR"
-                src={`https://quickchart.io/qr?text=${encodeURIComponent(`upi://pay?pa=${upiId}&am=${amount}&cu=INR`)}&size=180`}
-              />
-              <p className="mt-2 text-[11px] text-slate-400">Scan QR in any UPI app</p>
+              <div className="p-4 rounded-2xl border border-[var(--border-muted)] bg-white/5 shadow-lg">
+                <img
+                  className="rounded-xl"
+                  width={160}
+                  height={160}
+                  alt="UPI QR"
+                  src={`https://quickchart.io/qr?text=${encodeURIComponent(`upi://pay?pa=${upiId}&am=${amount}&cu=INR`)}&size=160`}
+                />
+              </div>
+              <p className="mt-3 text-xs text-slate-400">Scan QR in any UPI app</p>
             </div>
           </div>
 
@@ -185,17 +187,17 @@ export default function UpiPremiumPopup({ open, onClose, amount = 10, upiId = DE
             </label>
 
             {!isPending && (
-              <label>
-                <p className="text-xs uppercase tracking-widest font-black mb-2" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
-                  Screenshot upload
-                </p>
+              <label className="premium-file-input">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  className="w-full text-slate-200"
                 />
-                {file && <p className="mt-2 text-[12px] text-slate-400">Selected: {file.name}</p>}
+                <div className="file-input-wrapper">
+                  <span>📎</span>
+                  <span>{file ? file.name : 'Choose screenshot...'}</span>
+                </div>
+                {file && <p className="mt-2 text-xs text-slate-400">Selected: {file.name}</p>}
               </label>
             )}
           </div>
